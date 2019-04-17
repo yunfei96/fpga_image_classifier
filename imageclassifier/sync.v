@@ -1,0 +1,71 @@
+module sync(
+    input clk,
+    output HS,
+    output VS,
+    output reg inDisplayArea,
+    output reg [10:0] X,
+    output reg [9:0] Y
+  );
+  
+reg VGA_HS, VGA_VS;
+reg [10:0] Xnext; 
+reg [9:0] Ynext;
+wire Xmax;
+wire Ymax;
+
+/*------------------------------------------------
+horizontal
+
+front porch 24
+visible 1024
+sync pulse 136
+back porch 144
+line 1328
+
+vertical
+
+visible 768
+front porch 3
+sync pulse 6
+back proch 29
+line 806
+
+*/
+
+assign Xmax = (X == 1328)? 1'b1:1'b0; 
+assign Ymax = (Y == 806)? 1'b1:1'b0; 
+
+
+always @(posedge clk)
+	if (Xmax)
+		X <= 11'b0;
+	else
+		X <= X + 1;
+
+always @(posedge clk)
+begin
+	if (Xmax)
+	begin
+		if(Ymax)
+			Y <= 10'b0;
+		else
+			Y <= Y + 1;
+  end
+end
+
+always @(posedge clk)
+begin
+	VGA_HS <= (X > (24 + 1024) && ( X < (24 + 1024 + 136)));   
+	VGA_VS <= (Y > (768 + 3) && ( Y < (768 + 3 + 6)));   
+end
+
+always @(posedge clk)
+begin
+	inDisplayArea <= (X < 1024) && (Y < 768);
+end
+
+assign HS = ~VGA_HS;
+assign VS = ~VGA_VS;
+
+
+endmodule

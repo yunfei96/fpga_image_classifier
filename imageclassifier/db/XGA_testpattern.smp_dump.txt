@@ -1,0 +1,5 @@
+
+State Machine - |XGA_testpattern|testclock:test|state
+Name state.one 
+state.zero 0 
+state.one 1 
